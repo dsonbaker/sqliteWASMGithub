@@ -1,0 +1,56 @@
+name: Deploy Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sqlite3 brotli
+
+      - name: Generate test database
+        run: |
+          ROWS=20000 PAYLOAD_SIZE=256 scripts/generate-test-db.sh data/source.sqlite
+
+      - name: Prepare database artifacts
+        run: |
+          DB_VERSION="${GITHUB_SHA}" \
+          DB_URL=./data/db.sqlite.gz \
+          DB_BROTLI_URL=./data/db.sqlite.br \
+          scripts/prepare-db.sh data/source.sqlite
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+

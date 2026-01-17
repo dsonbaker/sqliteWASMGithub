@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SQLite WASM no GitHub Pages</title>
+    <link rel="stylesheet" href="./css/style.css" />
+    <!-- Pako é usado apenas como fallback quando DecompressionStream não está disponível -->
+    <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
+    <script type="module" src="./js/ui.js"></script>
+  </head>
+  <body>
+    <div class="page">
+      <h1>SQLite grande no GitHub Pages (WASM)</h1>
+
+      <div class="panel">
+        <label for="manifest-url">Manifest URL (.json com URLs/sha):</label>
+        <input id="manifest-url" type="text" value="./data/manifest.json" />
+
+        <label for="file-name">Nome do arquivo local (OPFS):</label>
+        <input id="file-name" type="text" value="db.sqlite" />
+
+        <div class="actions" style="margin: 12px 0">
+          <label>
+            <input id="prefer-brotli" type="checkbox" checked />
+            Preferir brotli
+          </label>
+          <label>
+            <input id="force-download" type="checkbox" />
+            Forçar re-download (ignorar cache/localStorage)
+          </label>
+        </div>
+
+        <div class="actions">
+          <button id="btn-fetch">Baixar e abrir banco</button>
+          <button id="btn-clear" class="danger" type="button">Limpar cache local</button>
+        </div>
+        <div id="status" data-type="info"></div>
+        <div id="meta"></div>
+      </div>
+
+      <div class="panel">
+        <label for="sql">SQL (Ctrl+Enter executa):</label>
+        <textarea id="sql">SELECT id, nome, categoria, valor, length(payload) AS payload_len FROM items LIMIT 10;</textarea>
+        <div class="actions" style="align-items: flex-end; margin-top: 8px">
+          <div style="flex: 1; min-width: 140px">
+            <label for="limit">Limite de linhas</label>
+            <input id="limit" type="number" value="200" min="1" />
+          </div>
+          <button id="btn-run" class="secondary" disabled>Executar</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Resultados</h3>
+        <table>
+          <thead id="results-head"></thead>
+          <tbody id="results-body"></tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h3>Dicas para bancos grandes</h3>
+        <ul>
+          <li>Para >100 MB, publique o `.sqlite.gz` em Releases e referencie a URL pública (CDN do GitHub).</li>
+          <li>Prefira gzip se precisar de compatibilidade máxima; brotli é mais eficiente mas menos suportado em streaming.</li>
+          <li>Use `scripts/prepare-db.sh` para VACUUM e gerar manifest com sha/tamanho.</li>
+          <li>Mantenha consultas paginadas (limite configurável acima) para não estourar memória.</li>
+          <li>O loader tenta armazenar no OPFS; se indisponível, faz fallback para buffer em memória.</li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>
+

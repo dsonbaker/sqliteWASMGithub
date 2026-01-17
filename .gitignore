@@ -1,0 +1,7 @@
+/data/*.sqlite
+/docs/data/manifest.json
+/docs/data/*.sqlite
+/docs/data/*.sqlite.gz
+/docs/data/*.sqlite.br
+/tmp/
+
