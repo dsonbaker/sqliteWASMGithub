@@ -7,7 +7,7 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -37,6 +37,16 @@ jobs:
           DB_URL=./data/db.sqlite.gz \
           DB_BROTLI_URL=./data/db.sqlite.br \
           scripts/prepare-db.sh data/source.sqlite
+
+      - name: Create/update release with DB assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: db-latest
+          name: db-latest
+          files: |
+            docs/data/db.sqlite.gz
+            docs/data/db.sqlite.br
+            docs/data/manifest.json
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
